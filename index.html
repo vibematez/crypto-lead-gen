@@ -113,6 +113,14 @@
                 <input type="hidden" name="_captcha" value="false">
                 <input type="hidden" name="_next" id="formNextField" value="thank-you.html">
 
+                <!-- Dynamic Bitmedia & Campaign Tracking Hidden Fields -->
+                <input type="hidden" name="utm_source" id="utm_source" value="bitmedia">
+                <input type="hidden" name="utm_medium" id="utm_medium" value="cpc">
+                <input type="hidden" name="utm_campaign" id="utm_campaign" value="crypto_leads">
+                <input type="hidden" name="source_macros" id="source_macros" value="">
+                <input type="hidden" name="country_code_macros" id="country_code_macros" value="">
+                <input type="hidden" name="full_tracking_url" id="full_tracking_url" value="">
+
                 <!-- 1. Full Name Field -->
                 <div class="form-group">
                   <label for="fullName" class="form-label">Full Name <span class="req">*</span></label>
@@ -470,18 +478,54 @@
        ========================================================================== -->
   <script>
     (function() {
-      // 1. Dynamic _next resolution for FormSubmit so it works seamlessly on any domain or relative path
+      // 1. Bitmedia & Campaign URL Tracking Extraction
       document.addEventListener("DOMContentLoaded", function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var trackingParams = [
+          'utm_source', 
+          'utm_medium', 
+          'utm_campaign', 
+          'source_macros', 
+          'country_code_macros'
+        ];
+
+        // Populate hidden form fields if present in URL
+        trackingParams.forEach(function(param) {
+          var val = urlParams.get(param);
+          if (val) {
+            var field = document.getElementById(param);
+            if (field) field.value = val;
+            try { sessionStorage.setItem(param, val); } catch (e) {}
+          } else {
+            // Check if stored in session from prior page view
+            try {
+              var stored = sessionStorage.getItem(param);
+              if (stored) {
+                var field = document.getElementById(param);
+                if (field) field.value = stored;
+              }
+            } catch (e) {}
+          }
+        });
+
+        // Save current full URL
+        var fullUrlField = document.getElementById("full_tracking_url");
+        if (fullUrlField) {
+          fullUrlField.value = window.location.href;
+        }
+
+        // Dynamic _next resolution with forward-passed tracking params
         var nextField = document.getElementById("formNextField");
         if (nextField) {
-          // If placeholder exists or is relative, resolve to absolute thank-you.html URL
-          if (!nextField.value.startsWith("http") || nextField.value.includes("REPLACE_WITH_YOUR_")) {
-            try {
-              var resolved = new URL("thank-you.html", window.location.href).href;
-              nextField.value = resolved;
-            } catch (e) {
-              nextField.value = "thank-you.html";
+          try {
+            var resolved = new URL("thank-you.html", window.location.href);
+            // Append current query string to thank-you redirect so conversion pixels get data
+            if (window.location.search) {
+              resolved.search = window.location.search;
             }
+            nextField.value = resolved.href;
+          } catch (e) {
+            nextField.value = "thank-you.html" + window.location.search;
           }
         }
       });

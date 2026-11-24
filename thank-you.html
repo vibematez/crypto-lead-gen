@@ -8,15 +8,36 @@
 
   <!-- ==========================================================================
        PASTE AD NETWORK CONVERSION PIXEL HERE
-       Examples: Bitmedia, Coinzilla, Google Ads, Twitter / X, Meta, Bing
+       Bitmedia, Coinzilla, Google Ads, Meta Tracking
        ========================================================================== -->
   <!-- PASTE AD NETWORK CONVERSION PIXEL HERE -->
-  <!-- 
   <script>
-    // Paste your Bitmedia / Coinzilla conversion snippet here
-    // Example: window.coinzilla_conversion = ...
+    (function() {
+      // Extract Bitmedia and UTM tracking parameters from URL or sessionStorage
+      var params = new URLSearchParams(window.location.search);
+      var utmSource = params.get('utm_source') || sessionStorage.getItem('utm_source') || 'bitmedia';
+      var utmCampaign = params.get('utm_campaign') || sessionStorage.getItem('utm_campaign') || 'crypto_leads';
+      var sourceMacro = params.get('source_macros') || sessionStorage.getItem('source_macros') || '';
+      var countryMacro = params.get('country_code_macros') || sessionStorage.getItem('country_code_macros') || '';
+
+      window.adTrackingData = {
+        source: utmSource,
+        campaign: utmCampaign,
+        sourceMacro: sourceMacro,
+        countryMacro: countryMacro
+      };
+
+      console.log('Conversion recorded:', window.adTrackingData);
+
+      // BITMEDIA CONVERSION PIXEL / POSTBACK TRIGGER:
+      // If Bitmedia provided you with a postback or pixel URL, it automatically includes the macros below:
+      /*
+      var bitmediaPixelUrl = "https://tracker.bitmedia.io/pixel?conv_type=lead&source=" + encodeURIComponent(sourceMacro);
+      var img = new Image();
+      img.src = bitmediaPixelUrl;
+      */
+    })();
   </script>
-  -->
 
   <!-- Preload Stylesheet for Instant Render -->
   <link rel="stylesheet" href="style.css">
